@@ -1,0 +1,4 @@
+app:
+  applicationId: 4525ae1d-53ef-4692-9eaf-6e5509e77058
+  host: http://example.com
+  env: Development
