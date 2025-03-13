@@ -1,21 +1,42 @@
-name: HawkScan
+name: Testing Workflow
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
-      - main
+      - dev01
+  
+permissions:
+  id-token: write  
+  contents: read
+
 jobs:
-  hawkscan:
-    name: HawkScan
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Clone repo
-        uses: actions/checkout@v2
-      - name: Run Nginx
-        run: docker run --rm --detach --publish 8080:80 --name nginx_test nginx
-      - name: Run HawkScan
-        uses: stackhawk/hawkscan-action@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          apiKey: ${{ secrets.HAWK_API_KEY }}
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::341877051563:role/service-role/codebuild-gh-runner-service-role
+      
+      - name: Run Codebuild
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: gh-runner
+          artifacts-type-override: NO_ARTIFACTS
+          buildspec-override: |
+            version: 0.2
+            phases:
+               build:  
+                  commands:
+                    - docker run --rm --detach --publish 8080:80 --name nginx_test nginx
+                    - docker ps -a
+               post_build:
+                  commands:
+                    - echo Running StackHawk DAST Scan...
+                    - docker run --rm -v ${PWD}:/hawk:rw -t -e API_KEY="hawk.Uxi702Aala1aZE4uh9Y2.hpw1hw65M0EnQKfnGCpj" -e NO_COLOUR=true stackhawk/hawkscan:latest
+                    
+
+      
+
+
