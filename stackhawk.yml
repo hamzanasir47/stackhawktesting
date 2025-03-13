@@ -1,4 +1,4 @@
 app:
-  applicationId: 4525ae1d-53ef-4692-9eaf-6e5509e77058
-  host: http://example.com
+  applicationId: 7d21929c-784a-4364-b0ba-c7c86f0acaf4
+  host: http://localhost:8080
   env: Development
